@@ -5,7 +5,8 @@ export default {
     extend: {
       colors: {
         'nu-purple': '#4e2a84',
-        'nu-purple-hover': '#6a3fb6',
+        'nu-purple-80': '#684c96',
+        'nu-purple-60': '#836eaa',
         'soft-bg': '#f9f9f9',
         'text-muted': '#666666',
       },

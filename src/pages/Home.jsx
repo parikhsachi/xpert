@@ -4,8 +4,10 @@ const Home = () => {
   const [question, setQuestion] = useState('');
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSendPrompt = async () => {
+    setLoading(true);
     try {
       setError(null);
       // send api request to backend
@@ -52,6 +54,7 @@ const Home = () => {
       console.error("Error sending user prompt:", err);
       setError(err.message || "Something went wrong.")
     }
+    setLoading(false);
   }
   return (
     <div className="text-center">
@@ -66,12 +69,21 @@ const Home = () => {
         placeholder="Enter your question"
         className="w-full p-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-nu-purple"
       />
-      <button
-        onClick={handleSendPrompt}
-        className="mt-4 bg-nu-purple hover:bg-nu-purple-hover text-white font-semibold py-2 px-6 rounded"
-      >
-        Get Answer
-      </button>
+      {!loading && (
+        <button
+          onClick={handleSendPrompt}
+          className="mt-4 bg-nu-purple hover:bg-nu-purple-80 text-white font-semibold py-2 px-6 rounded"
+        >
+          Get Answer
+        </button>
+      )}
+      {loading && (
+        <button
+          className="mt-4 bg-nu-purple-60 hover:bg-nu-purple-80 text-white font-semibold py-2 px-6 rounded"
+        >
+          Loading...
+        </button>
+      )}
       <p className="mt-4 text-muted text-sm">Papers, Blogs, Interviews</p>
 
       {error && (
