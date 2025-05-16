@@ -1,5 +1,8 @@
 import os
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 API_URL = "https://api.semanticscholar.org/graph/v1"
 API_KEY = os.getenv("S2_API_KEY")
@@ -9,13 +12,13 @@ HEADERS = {
 }
 
 def search_papers(query: str, limit=5):
-    # for testing
-    from pathlib import Path
-    import json
-    TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
-    file_path = TEMP_DIR / "2025-05-14T11-59-54.434454.json"
-    with open(file_path, "r") as f:
-        return json.load(f)["data"]
+    # # for testing
+    # from pathlib import Path
+    # import json
+    # TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
+    # file_path = TEMP_DIR / "papers-2025-05-16T00-37-18.540746.json"
+    # with open(file_path, "r") as f:
+    #     return json.load(f)["data"]
 
     # ===== Remove above lines when we're ready for real testing =====
 
@@ -31,15 +34,15 @@ def search_papers(query: str, limit=5):
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
-        print("[SemanticScholar] HTTPError:", e)
-        print("[SemanticScholar] Response:", response.text)
-        return {}
+        print("[SemanticScholar/paper] HTTPError:", e)
+        print("[SemanticScholar/paper] Response:", response.text)
+        return []
 
     json_data = response.json()
     # check for malformatted response
     if "data" not in json_data:
-        print("[SemanticScholar] Unexpected response:", json_data)
-        return {}
+        print("[SemanticScholar/paper] Unexpected response:", json_data)
+        return []
 
     # # dump file to temp file for testing
     # from pathlib import Path
@@ -53,10 +56,65 @@ def search_papers(query: str, limit=5):
     # import json
 
     # timestamp = datetime.now().isoformat().replace(":", "-")  # Safe for filenames
-    # file_path = TEMP_DIR / f"{timestamp}.json"
+    # file_path = TEMP_DIR / f"papers-{timestamp}.json"
 
     # # Example usage: write JSON data to the file
     # with open(file_path, "w") as f:
-    #     json.dump(response.json(), f, indent=2)
+    #     json.dump(json_data, f, indent=2)
     
-    return response.json()["data"]
+    return json_data["data"]
+
+def search_authors(ids: list[str]):
+    # # for testing
+    # from pathlib import Path
+    # import json
+    # TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
+    # file_path = TEMP_DIR / "authors-2025-05-16T00-37-26.450555.json"
+    # with open(file_path, "r") as f:
+    #     return json.load(f)
+
+    # ===== Remove above lines when we're ready for real testing =====
+
+    url = f"{API_URL}/author/batch"
+    params = {
+        "fields": "name,url,affiliations,hIndex,paperCount,papers,papers.title,papers.url,papers.year,papers.citationCount,papers.fieldsOfStudy"
+    }
+    json = {
+        "ids": ids
+    }
+
+    response = requests.post(url, headers=HEADERS, params=params, json=json)
+
+    # check for error
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        print("[SemanticScholar/author] HTTPError:", e)
+        print("[SemanticScholar/author] Response:", response.text)
+        return []
+
+    json_data = response.json()
+    # check for malformatted response
+    if len(json_data) == 0 or "authorId" not in json_data[0]:
+        print("[SemanticScholar/author] Unexpected response:", json_data)
+        return []
+    
+    # # dump file to temp file for testing
+    # from pathlib import Path
+
+    # # Resolve the absolute path to the 'temp' directory
+    # TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
+    # TEMP_DIR.mkdir(parents=True, exist_ok=True)  # Create it if it doesn't exist
+
+    # # Example: create timestamped filename
+    # from datetime import datetime
+    # import json
+
+    # timestamp = datetime.now().isoformat().replace(":", "-")  # Safe for filenames
+    # file_path = TEMP_DIR / f"authors-{timestamp}.json"
+
+    # # Example usage: write JSON data to the file
+    # with open(file_path, "w") as f:
+    #     json.dump(json_data, f, indent=2)
+    
+    return json_data

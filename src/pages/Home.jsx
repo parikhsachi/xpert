@@ -93,32 +93,52 @@ const Home = () => {
       )}
 
       {response && (
-        <div className="mt-8 text-left max-w-2xl mx-auto bg-white shadow rounded p-6">
+        <div className="mt-8 text-left max-w-4xl mx-auto space-y-6">
+          <h2 className="text-2xl font-bold text-nu-purple">Matched Experts</h2>
+          <p className="text-sm italic">Here are some experts that may be relevant to your query. Scroll to see each expert's publications, sample viewpoint on the topic, and contact info.</p>
 
-          <h2 className="text-2xl font-bold text-nu-purple">Experts</h2>
-          <p className="text-sm italic mb-2">These are the experts that I believe have the most relevant knowledge for your question.</p>
-          <ul className="list-disc list-inside text-sm mb-4">
-            {response.experts.map((exp, idx) => (
-              <li key={idx}>
-                {exp.name} – {exp.affiliation} ({exp.expertise.join(", ")})
-              </li>
-            ))}
-          </ul>
-
-          <h3 className="font-semibold">Answer</h3>
-          <p className="text-sm italic mb-1">Here is a sample response based on existing literature online.</p>
-          <p className="mb-4">{response.answer}</p>
-
-          <h3 className="font-semibold mb-1">Sources and Further Reading</h3>
-          <ul className="list-disc list-inside text-sm mb-4">
-            {response.sources.map((src, idx) => (
-              <li key={idx}>
-                <a href={src.url} className="text-nu-purple hover:underline" target="_blank" rel="noreferrer">
-                  {src.title} ({src.type})
+          {response.error && (
+            <div className="mt-4 text-red-600 font-medium">
+              {response.error}
+            </div>
+          )}
+          {response.experts.map((expert, idx) => (
+            <div key={idx} className="bg-white shadow-md rounded p-6 border border-gray-200">
+              <h3 className="text-xl font-semibold text-nu-purple mb-1">
+                <a href={expert.url} target="_blank" rel="noreferrer" className="hover:underline">
+                  {expert.name}
                 </a>
-              </li>
-            ))}
-          </ul>
+              </h3>
+              <p className="text-sm text-gray-600 mb-2">
+                Field{expert.expertise?.length > 1 || expert.expertise[0] == "No explicit fields of expertise found." ? 's' : ''}: {expert.expertise?.length ? expert.expertise.join(', ') : 'Not available'}
+              </p>
+
+              <p className="text-sm mb-4">H-Index: {expert.hIndex}</p>
+
+              <p className="text-sm font-medium mb-1">Affiliations:</p>
+              <ul className="list-disc list-inside text-sm mb-4">
+                {expert.affiliations.map((affiliation, j) => (
+                  <li key={j}>{affiliation}</li>
+                ))}
+              </ul>
+
+              <p className="text-sm text-gray-800 mb-2 italic">Sample Perspective:</p>
+              <p className="text-sm mb-4">{expert.answer}</p>
+
+              <p className="text-sm font-medium mb-1">Key Publications:</p>
+              <ul className="list-disc list-inside text-sm mb-4">
+                {expert.papers.map((paper, j) => (
+                  <li key={j}>
+                    <a href={paper.url} target="_blank" rel="noreferrer" className="text-nu-purple hover:underline">
+                      {paper.title} ({paper.venue || 'unknown venue'}, {paper.year}, {paper.citationCount} citations)
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="text-sm text-gray-500">Contact Info: <span className="italic">[Placeholder for contact info]</span></p>
+            </div>
+          ))}
         </div>
       )}
     </div>
