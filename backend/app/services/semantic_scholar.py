@@ -12,13 +12,13 @@ HEADERS = {
 }
 
 def search_papers(query: str, limit=5):
-    # # for testing
-    # from pathlib import Path
-    # import json
-    # TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
-    # file_path = TEMP_DIR / "papers-2025-05-16T00-37-18.540746.json"
-    # with open(file_path, "r") as f:
-    #     return json.load(f)["data"]
+    # for testing
+    from pathlib import Path
+    import json
+    TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
+    file_path = TEMP_DIR / "papers-2025-05-18T19-08-00.915084.json"
+    with open(file_path, "r") as f:
+        return json.load(f)["data"]
 
     # ===== Remove above lines when we're ready for real testing =====
 
@@ -65,13 +65,13 @@ def search_papers(query: str, limit=5):
     return json_data["data"]
 
 def search_authors(ids: list[str]):
-    # # for testing
-    # from pathlib import Path
-    # import json
-    # TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
-    # file_path = TEMP_DIR / "authors-2025-05-16T00-37-26.450555.json"
-    # with open(file_path, "r") as f:
-    #     return json.load(f)
+    # for testing
+    from pathlib import Path
+    import json
+    TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
+    file_path = TEMP_DIR / "authors-2025-05-18T19-08-03.208244.json"
+    with open(file_path, "r") as f:
+        return json.load(f)
 
     # ===== Remove above lines when we're ready for real testing =====
 

@@ -17,6 +17,7 @@ class Expert(BaseModel):
     paperCount: int
     papers: List[Paper]
     answer: str
+    contact: Optional[dict]
 
 class AskRequest(BaseModel):
     question: str

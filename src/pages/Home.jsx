@@ -136,7 +136,42 @@ const Home = () => {
                 ))}
               </ul>
 
-              <p className="text-sm text-gray-500">Contact Info: <span className="italic">[Placeholder for contact info]</span></p>
+              <p className="text-sm font-medium mb-1">Contact Info:</p>
+              {expert.contact && (
+                <div className="text-sm text-gray-700 space-y-1">
+                  {expert.contact.emails?.length > 0 && (
+                    <div>
+                      <span className="font-semibold">Emails:</span>{' '}
+                      {expert.contact.emails.map((email, i) => (
+                        <span key={i} className="block text-blue-700 underline">{email}</span>
+                      ))}
+                    </div>
+                  )}
+                  {expert.contact.websites?.length > 0 && (
+                    <div>
+                      <span className="font-semibold">Websites:</span>{' '}
+                      {expert.contact.websites.map((site, i) => (
+                        <a key={i} href={site} target="_blank" rel="noreferrer" className="block text-blue-700 underline">
+                          {site}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {expert.contact["other-ids"]?.length > 0 && (
+                    <div>
+                      <span className="font-semibold">Profiles:</span>{' '}
+                      {expert.contact["other-ids"].map((id, i) => (
+                        <a key={i} href={id} target="_blank" rel="noreferrer" className="block text-blue-700 underline">
+                          {id}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {(!expert.contact.emails?.length && !expert.contact.websites?.length && !expert.contact["other-ids"]?.length) && (
+                    <p className="italic text-gray-500">No contact info available.</p>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

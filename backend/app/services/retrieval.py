@@ -10,6 +10,8 @@ from app.services.refine_results import filter_papers
 from app.services.refine_results import get_expertise
 import time
 
+min_h_index = 0
+
 def get_expert_answer(question: str):
     papers = search_papers(question)
 
@@ -35,8 +37,18 @@ def get_expert_answer(question: str):
 
         experts = []
 
+        # import sample answers from json
+        from pathlib import Path
+        import json
+        sample_answers = None
+        TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
+        file_path = TEMP_DIR / "sample_answers.json"
+        with open(file_path, "r") as f:
+            sample_answers = json.load(f)["answers"]
+        count = 0
+
         for author in authors:
-            if author["hIndex"] < 1:
+            if author["hIndex"] < min_h_index:
                 continue
 
             expertise = get_expertise(author["papers"])
@@ -51,8 +63,11 @@ def get_expert_answer(question: str):
                 "expertise": expertise,
                 "paperCount": author["paperCount"],
                 "papers": top_papers,
-                "answer": "Placeholder for sample author opinion on the topic.",
+                "answer": sample_answers[count],
+                "contact": author.get("contact") or {}
             }
+            # remember to delete this
+            count += 1
             if expert not in experts:
                 experts.append(expert)
 
