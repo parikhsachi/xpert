@@ -43,10 +43,10 @@ const Home = () => {
     setLoading(false);
   }
   return (
-    <div className="w-full text-center px-8">
+    <div className="w-full text-center p-8">
       <h1 className="text-4xl font-bold text-nu-purple mb-4">Welcome to Xpert.ai</h1>
       <p className="text-muted mb-6">
-        Ask a question and we’ll match it to real expert content — papers, blogs, interviews, and more.
+        Ask a question and we’ll match it to real expert insight — backed by research, publications, and profiles.
       </p>
       <div className="w-full mx-auto max-w-4xl">
         <input
@@ -71,7 +71,7 @@ const Home = () => {
             Loading...
           </button>
         )}
-        <p className="mt-4 text-muted text-sm">Papers, Blogs, Interviews</p>
+        <p className="mt-4 text-muted text-sm">Credible. Cited. Concise.</p>
 
         {error && (
           <div className="mt-4 text-red-600 font-medium">
@@ -87,24 +87,23 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.4 }}
-            className="bg-white mt-8 text-left mx-auto px-6 py-8 shadow-md rounded"
+            className="bg-white mt-8 text-left mx-auto px-6 py-8 shadow-md hover:shadow-lg border border-gray-300 rounded"
           >
             <div className="text-center">
               <h2 className="text-2xl font-bold text-nu-purple mb-2">Matched Experts</h2>
               <p className="text-sm italic mb-6">Here are some experts that may be relevant to your query. Scroll to see each expert's publications, sample viewpoint on the topic, and contact info.</p>
+              {response.error && (
+                <div className="mt-4 text-red-600 font-medium">
+                  {response.error}
+                </div>
+              )}
             </div>
-            
-            {response.error && (
-              <div className="mt-4 text-red-600 font-medium">
-                {response.error}
-              </div>
-            )}
 
             <div id="results" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-8">
               {response.experts.map((expert, idx) => (
                 <div
                   key={idx}
-                  className="bg-white shadow-md rounded p-6 border border-gray-200 cursor-pointer hover:shadow-lg transition"
+                  className="bg-white shadow-md rounded p-6 border border-gray-300 cursor-pointer hover:shadow-xl transition"
                   onClick={() => setActiveExpert(expert)}
                 >
                   <h3 className="text-xl font-semibold text-nu-purple mb-1">{expert.name}</h3>
