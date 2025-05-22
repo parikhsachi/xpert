@@ -2,48 +2,49 @@ import json
 from openai import OpenAI
 import os
 
-DEFAULT_SYSTEM_PROMPT = """You are an expert knowledge assistant. For the following question, provide:
-  1. Multiple accredited and relevant experts in the field (if the topic has room for differing opinions, it is preferred that the choice of experts reflects that).
-  1. A concise answer that these experts might respond with based on the literature you find online.
-  2. Relevant sources (academic papers, articles, etc.) written by said experts, with proper URLs.
-
-  Format the response as **JSON only** with this structure:
-  {
-    "experts": [{"name": "string", "affiliation": "string", "expertise": ["string"]}],
-    "answer": "string",
-    "sources": [{"title": "string", "url": "string", "type": "string"}],
-  }
-  Do not include any explanation outside the JSON.
+BASE_SYSTEM_PROMPT = """You are an expert knowledge interpreter. Based on the article abstracts provided by co-author provided, \
+  generate a sample expert perspective (1 paragraph or less) on the topic provided by the user. The summary should be concise, \
+  insightful, and helpful to a user trying to learn about the topic. It should be written in an assertive voice, and ensure that \
+  the perspective/argument is clearly displayed at the front such that it is clearly conveyed to the user. Do not include the \
+  abstracts or titles in the response.
   """
 
-def query_openai(prompt: str) -> str:
+BASE_PROMPT = """##Name: {name}
+  ###Topic: '{query}'
+  ###Papers:\n"
+"""
+
+def query_openai(papers: str, query: str, name: str) -> str:
+  if papers == []:
+    return f"Error: not enough info found about {name} to generate perspective"
+
   client = OpenAI(
     api_key = os.getenv("OPENAI_API_KEY"),
   )
+
+  system_prompt = BASE_SYSTEM_PROMPT.format(name=name, query=query)
+
+  prompt = BASE_PROMPT.format(name=name, query=query)
+
+  for paper in papers:
+    title = paper["title"]
+    abstract = "No abstract found"
+    if "abstract" in paper:
+      abstract = paper["abstract"]
+    prompt += f"Title: {title}\nAbstract: {abstract}\n\n"
 
   try:
     response = client.chat.completions.create(
       model = "gpt-3.5-turbo",
       messages = [
-        # idea: add {domain} field and specifically tell the system to find experts that would
-        # help to build an argument for {domain}
-        {"role": "system", "content": DEFAULT_SYSTEM_PROMPT},
+        {"role": "system", "content": system_prompt},
         {"role": "user", "content": prompt}
       ],
       # temperature = 0.7,
       # max_tokens = 300
     )
 
-    content = response.choices[0].message.content.strip()
+    return response.choices[0].message.content.strip()
 
-    try:
-      return json.loads(content)
-    except json.JSONDecodeError:
-      print("Failed to parse JSON response:\n", content)
-      return {
-        "answer": "Error: Unable to parse AI response.",
-        "sources": [],
-        "experts": []
-      }
   except RateLimitError as e:
     raise HTTPException(status_code=429, detail="You've exceeded your OpenAI quota. Please try again later.")

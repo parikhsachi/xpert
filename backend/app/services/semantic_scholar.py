@@ -16,7 +16,7 @@ def search_papers(query: str, limit=5):
     from pathlib import Path
     import json
     TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
-    file_path = TEMP_DIR / "papers-2025-05-18T19-08-00.915084.json"
+    file_path = TEMP_DIR / "papers-ai-hiring.json"
     with open(file_path, "r") as f:
         return json.load(f)["data"]
 
@@ -69,7 +69,7 @@ def search_authors(ids: list[str]):
     from pathlib import Path
     import json
     TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
-    file_path = TEMP_DIR / "authors-2025-05-18T19-08-03.208244.json"
+    file_path = TEMP_DIR / "authors-ai-hiring.json"
     with open(file_path, "r") as f:
         return json.load(f)
 
@@ -77,7 +77,7 @@ def search_authors(ids: list[str]):
 
     url = f"{API_URL}/author/batch"
     params = {
-        "fields": "name,url,affiliations,hIndex,paperCount,papers,papers.title,papers.url,papers.year,papers.citationCount,papers.fieldsOfStudy"
+        "fields": "name,url,affiliations,hIndex,paperCount,papers,papers.title,papers.url,papers.year,papers.citationCount,papers.fieldsOfStudy,papers.abstract"
     }
     json = {
         "ids": ids

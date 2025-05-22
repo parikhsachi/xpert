@@ -27,29 +27,11 @@ const Home = () => {
 
       const data = await res.json();
 
-      // // sample response placeholding for the model's generated response. ChatGPT used this format which seems pretty solid
-      // const mockResponse = {
-      //   answer: "Sustainable architecture focuses on energy efficiency, material reuse, and minimizing environmental impact.",
-      //   sources: [
-      //     {
-      //       title: "Green Design by Lisa Smith",
-      //       url: "https://example.com/green-design",
-      //       type: "academic paper"
-      //     }
-      //   ],
-      //   experts: [
-      //     {
-      //       name: "Lisa Smith",
-      //       affiliation: "MIT",
-      //       expertise: ["Sustainability", "Architecture"]
-      //     }
-      //   ]
-      // }
-
       setResponse(data);
       console.log("Received response:", data);
 
-      // switch router to response page? not sure about this yet, maybe it will output the text on the same UI
+      // scroll to response
+      document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
     } catch(err) {
       console.error("Error sending user prompt:", err);
       setError(err.message || "Something went wrong.")
@@ -93,87 +75,91 @@ const Home = () => {
       )}
 
       {response && (
-        <div className="mt-8 text-left max-w-4xl mx-auto space-y-6">
-          <h2 className="text-2xl font-bold text-nu-purple">Matched Experts</h2>
-          <p className="text-sm italic">Here are some experts that may be relevant to your query. Scroll to see each expert's publications, sample viewpoint on the topic, and contact info.</p>
+        <div className="mt-8 text-left mx-auto max-w-screen-xl px-4">
+          <h2 className="text-2xl font-bold text-nu-purple mb-2">Matched Experts</h2>
+          <p className="text-sm italic mb-6">Here are some experts that may be relevant to your query. Scroll to see each expert's publications, sample viewpoint on the topic, and contact info.</p>
 
+          
           {response.error && (
             <div className="mt-4 text-red-600 font-medium">
               {response.error}
             </div>
           )}
-          {response.experts.map((expert, idx) => (
-            <div key={idx} className="bg-white shadow-md rounded p-6 border border-gray-200">
-              <h3 className="text-xl font-semibold text-nu-purple mb-1">
-                <a href={expert.url} target="_blank" rel="noreferrer" className="hover:underline">
-                  {expert.name}
-                </a>
-              </h3>
-              <p className="text-sm text-gray-600 mb-2">
-                Field{expert.expertise?.length > 1 || expert.expertise[0] == "No explicit fields of expertise found." ? 's' : ''}: {expert.expertise?.length ? expert.expertise.join(', ') : 'Not available'}
-              </p>
 
-              <p className="text-sm mb-4">H-Index: {expert.hIndex}</p>
+          <div id="results" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-8">
+            {response.experts.map((expert, idx) => (
+              <div key={idx} className="bg-white shadow-md rounded p-6 border border-gray-200">
+                <h3 className="text-xl font-semibold text-nu-purple mb-1">
+                  <a href={expert.url} target="_blank" rel="noreferrer" className="hover:underline">
+                    {expert.name}
+                  </a>
+                </h3>
+                <p className="text-sm text-gray-600 mb-2">
+                  Field{expert.expertise?.length > 1 || expert.expertise[0] == "No explicit fields of expertise found." ? 's' : ''}: {expert.expertise?.length ? expert.expertise.join(', ') : 'Not available'}
+                </p>
 
-              <p className="text-sm font-medium mb-1">Affiliations:</p>
-              <ul className="list-disc list-inside text-sm mb-4">
-                {expert.affiliations.map((affiliation, j) => (
-                  <li key={j}>{affiliation}</li>
-                ))}
-              </ul>
+                <p className="text-sm mb-4">H-Index: {expert.hIndex}</p>
 
-              <p className="text-sm text-gray-800 mb-2 italic">Sample Perspective:</p>
-              <p className="text-sm mb-4">{expert.answer}</p>
+                <p className="text-sm font-medium mb-1">Affiliations:</p>
+                <ul className="list-disc list-inside text-sm mb-4">
+                  {expert.affiliations.map((affiliation, j) => (
+                    <li key={j}>{affiliation}</li>
+                  ))}
+                </ul>
 
-              <p className="text-sm font-medium mb-1">Key Publications:</p>
-              <ul className="list-disc list-inside text-sm mb-4">
-                {expert.papers.map((paper, j) => (
-                  <li key={j}>
-                    <a href={paper.url} target="_blank" rel="noreferrer" className="text-nu-purple hover:underline">
-                      {paper.title} ({paper.venue || 'unknown venue'}, {paper.year}, {paper.citationCount} citations)
-                    </a>
-                  </li>
-                ))}
-              </ul>
+                <p className="text-sm text-gray-800 mb-2 italic">Sample Perspective:</p>
+                <p className="text-sm mb-4">{expert.answer}</p>
 
-              <p className="text-sm font-medium mb-1">Contact Info:</p>
-              {expert.contact && (
-                <div className="text-sm text-gray-700 space-y-1">
-                  {expert.contact.emails?.length > 0 && (
-                    <div>
-                      <span className="font-semibold">Emails:</span>{' '}
-                      {expert.contact.emails.map((email, i) => (
-                        <span key={i} className="block text-blue-700 underline">{email}</span>
-                      ))}
-                    </div>
-                  )}
-                  {expert.contact.websites?.length > 0 && (
-                    <div>
-                      <span className="font-semibold">Websites:</span>{' '}
-                      {expert.contact.websites.map((site, i) => (
-                        <a key={i} href={site} target="_blank" rel="noreferrer" className="block text-blue-700 underline">
-                          {site}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                  {expert.contact["other-ids"]?.length > 0 && (
-                    <div>
-                      <span className="font-semibold">Profiles:</span>{' '}
-                      {expert.contact["other-ids"].map((id, i) => (
-                        <a key={i} href={id} target="_blank" rel="noreferrer" className="block text-blue-700 underline">
-                          {id}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                  {(!expert.contact.emails?.length && !expert.contact.websites?.length && !expert.contact["other-ids"]?.length) && (
-                    <p className="italic text-gray-500">No contact info available.</p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+                <p className="text-sm font-medium mb-1">Key Publications:</p>
+                <ul className="list-disc list-inside text-sm mb-4">
+                  {expert.papers.map((paper, j) => (
+                    <li key={j}>
+                      <a href={paper.url} target="_blank" rel="noreferrer" className="text-nu-purple hover:underline">
+                        {paper.title} ({paper.venue || 'unknown venue'}, {paper.year}, {paper.citationCount} citations)
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="text-sm font-medium mb-1">Contact Info:</p>
+                {expert.contact && (
+                  <div className="text-sm text-gray-700 space-y-1">
+                    {expert.contact.emails?.length > 0 && (
+                      <div>
+                        <span className="font-semibold">Emails:</span>{' '}
+                        {expert.contact.emails.map((email, i) => (
+                          <span key={i} className="block text-blue-700 underline">{email}</span>
+                        ))}
+                      </div>
+                    )}
+                    {expert.contact["researcher-urls"]?.length > 0 && (
+                      <div>
+                        <span className="font-semibold">Websites:</span>
+                        {expert.contact["researcher-urls"].map((site, i) => (
+                          <a key={i} href={site.url} target="_blank" rel="noreferrer" className="block text-blue-700 underline">
+                            {site.name || site.url}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                    {expert.contact["external-identifiers"]?.length > 0 && (
+                      <div>
+                        <span className="font-semibold">Profiles:</span>
+                        {expert.contact["external-identifiers"].map((id, i) => (
+                          <a key={i} href={id.url} target="_blank" rel="noreferrer" className="block text-blue-700 underline">
+                            {id.name || id.url}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                    {(!expert.contact.emails?.length && !expert.contact["researcher-urls"]?.length && !expert.contact["external-identifiers"]?.length) && (
+                      <p className="italic text-gray-500">No contact info available.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
