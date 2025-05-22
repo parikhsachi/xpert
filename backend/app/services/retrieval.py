@@ -1,21 +1,26 @@
-from app.services.semantic_scholar import search_papers
-from app.services.semantic_scholar import search_authors
-from app.services.refine_results import filter_papers
-from app.services.refine_results import get_expertise
-from app.services.orcid import get_orcid_profile
-from app.services.orcid import get_orcid_affiliations
-from app.services.openai_chat import query_openai
+from app.services.semantic_scholar import search_papers, search_authors
+from app.services.refine_results import rank_papers, rank_authors, filter_papers, get_expertise
+from app.services.orcid import get_orcid_profile, get_orcid_affiliations
+from app.services.openai_chat import query_openai_bulk
 import time
 
 min_h_index = 0
 
 def get_expert_answer(question: str):
     papers = search_papers(question)
+    if not papers:
+        return {
+            "numExperts": 0,
+            "experts": [],
+            "error": "No papers were returned for this query. Please try a different question."
+        }
+
+    ranked_papers = rank_papers(papers)
 
     paper_ids = []
     author_ids = []
 
-    for paper in papers:
+    for paper in ranked_papers:
         paper_id = paper["paperId"]
         # store paper ids, since these are likely the most relevant papers, so the model
         # shows each as the first paper associated with the affiliated expert
@@ -26,11 +31,12 @@ def get_expert_answer(question: str):
             if author_id not in author_ids:
                 author_ids.append(author_id) 
 
-    if papers:
+    if ranked_papers:
         # rate limit of 1 request per second
         time.sleep(2)
 
         authors = search_authors(author_ids)
+        ranked_authors = rank_authors(authors)
 
         experts = []
 
@@ -44,19 +50,35 @@ def get_expert_answer(question: str):
         #     sample_answers = json.load(f)["answers"]
         # count = 0
 
-        for author in authors:
+        # call GPT to get expert perspective
+        try:
+            author_data = [
+                {"name": author["name"], "authorId": author["authorId"], "papers": author["papers"][:5]}
+                for author in ranked_authors
+                if author["hIndex"] >= min_h_index
+            ]
+            gpt_answers = query_openai_bulk(authors=author_data, query=question)
+            print(f"\nGPT response type: {type(gpt_answers)}\nContent: {gpt_answers}\n")
+        except Exception as e:
+            print(f"OpenAI API call failed: {e}")
+            gpt_answers = {}
+
+        for author in ranked_authors:
             if author["hIndex"] < min_h_index:
                 continue
 
+            name = author["name"]
             expertise = get_expertise(author["papers"])
             top_papers = filter_papers(author["papers"], paper_ids)
 
             affiliations = author["affiliations"]
             contact = {}
 
+            gpt_answer = gpt_answers.get(author["authorId"], "We couldn't generate a response for this expert.")
+
             # if affiliations missing, try ORCID
             if not affiliations or all(not a for a in affiliations):
-                name_parts = author["name"].split()
+                name_parts = name.split()
                 result = get_orcid_profile(author)
                 if result:
                     orcid_data, orcid_id = result
@@ -93,22 +115,8 @@ def get_expert_answer(question: str):
                             if i.get("external-id-url", {}).get("value")
                         ]
 
-            # # call GPT to get expert perspective
-            # try:
-            #     gpt_answer = query_openai(
-            #         papers=author["papers"][:16],
-            #         query=question,
-            #         name=author["name"]
-            #     )
-            #     print(f"\nGPT response type: {type(gpt_answer)}\nContent: {gpt_answer}\n")
-            #     time.sleep(1.5)  # avoid OpenAI rate limits
-            # except Exception as e:
-            #     print(f"OpenAI API call failed for {author['name']}: {e}")
-            #     gpt_answer = "We couldn't generate an AI response for this expert at this time."
-            gpt_answer = "Placeholder (not testing GPT right now)"
-
             expert = {
-                "name": author["name"],
+                "name": name,
                 "url": author["url"],
                 "affiliations": affiliations or ["No affiliations found"],
                 "hIndex": author["hIndex"],

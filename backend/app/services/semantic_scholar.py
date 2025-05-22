@@ -11,14 +11,14 @@ HEADERS = {
     "x-api-key": API_KEY
 }
 
-def search_papers(query: str, limit=5):
-    # for testing
-    from pathlib import Path
-    import json
-    TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
-    file_path = TEMP_DIR / "papers-ai-hiring.json"
-    with open(file_path, "r") as f:
-        return json.load(f)["data"]
+def search_papers(query: str, limit=25):
+    # # for testing
+    # from pathlib import Path
+    # import json
+    # TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
+    # file_path = TEMP_DIR / "papers-illegal-immigration.json"
+    # with open(file_path, "r") as f:
+    #     return json.load(f)["data"]
 
     # ===== Remove above lines when we're ready for real testing =====
 
@@ -26,7 +26,7 @@ def search_papers(query: str, limit=5):
     params = {
         "query": query,
         "limit": limit,
-        "fields": "title,authors,url,venue,year,fieldsOfStudy"
+        "fields": "title,authors,url,venue,year,fieldsOfStudy,citationCount"
     }
     response = requests.get(url, headers=HEADERS, params=params)
 
@@ -65,13 +65,13 @@ def search_papers(query: str, limit=5):
     return json_data["data"]
 
 def search_authors(ids: list[str]):
-    # for testing
-    from pathlib import Path
-    import json
-    TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
-    file_path = TEMP_DIR / "authors-ai-hiring.json"
-    with open(file_path, "r") as f:
-        return json.load(f)
+    # # for testing
+    # from pathlib import Path
+    # import json
+    # TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
+    # file_path = TEMP_DIR / "authors-illegal-immigration.json"
+    # with open(file_path, "r") as f:
+    #     return json.load(f)
 
     # ===== Remove above lines when we're ready for real testing =====
 
@@ -80,7 +80,7 @@ def search_authors(ids: list[str]):
         "fields": "name,url,affiliations,hIndex,paperCount,papers,papers.title,papers.url,papers.year,papers.citationCount,papers.fieldsOfStudy,papers.abstract"
     }
     json = {
-        "ids": ids
+        "ids": ids[:27]
     }
 
     response = requests.post(url, headers=HEADERS, params=params, json=json)
