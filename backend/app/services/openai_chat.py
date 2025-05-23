@@ -38,7 +38,7 @@ def query_openai_bulk(authors: list[dict], query: str) -> dict:
       abstract = paper.get("abstract", "No abstract")
       prompt += f"Title: {title}\nAbstract: {abstract}\n\n"
   
-  print(prompt)
+  # print(prompt)
 
   try:
     response = client.chat.completions.create(

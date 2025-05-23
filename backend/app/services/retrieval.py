@@ -2,6 +2,7 @@ from app.services.semantic_scholar import search_papers, search_authors
 from app.services.refine_results import rank_papers, rank_authors, filter_papers, get_expertise
 from app.services.orcid import get_orcid_profile, get_orcid_affiliations
 from app.services.openai_chat import query_openai_bulk
+from app.services.helpers.score_papers import relevance_score
 import time
 
 min_h_index = 0
@@ -17,25 +18,51 @@ def get_expert_answer(question: str):
 
     ranked_papers = rank_papers(papers)
 
-    paper_ids = []
-    author_ids = []
+    key_paper_ids = []
+    author_score_boosts = {}
 
-    for paper in ranked_papers:
+    for i, paper in enumerate(ranked_papers):
         paper_id = paper["paperId"]
+
+        paper_rank_score = relevance_score(i, len(ranked_papers))
+
         # store paper ids, since these are likely the most relevant papers, so the model
         # shows each as the first paper associated with the affiliated expert
-        if paper_id not in paper_ids:
-            paper_ids.append(paper_id)
-        for author in paper.get("authors", []):
+        if paper_id not in key_paper_ids:
+            key_paper_ids.append(paper_id)
+        paper_authors = paper.get("authors", [])
+        for j, author in enumerate(paper_authors):
             author_id = author["authorId"]
-            if author_id not in author_ids:
-                author_ids.append(author_id) 
+            
+            """
+            For heuristic sorting before fetching list of author names, since Semantic Scholar likely
+            won't be able to fetch all of the authors in one batch call.
+
+            Authors get a +0.03 boost for being the first or last author listed, as they tend to be
+            the lead contributor and the senior supervisor or principal investigator, respectively.
+            https://blog.wordvice.com/journal-article-author-order/
+
+            Authors get a +(0.07 * paper relevancy rank) boost, ensuring that the heuristic still
+            prioritizes the findings of rank_papers
+            """
+
+            if j == 0 or j == len(paper_authors) - 1:
+                author_score_boosts[author_id] = 0.03
+            else:
+                author_score_boosts[author_id] = 0
+            
+            author_score_boosts[author_id] += 0.07 * paper_rank_score
+
+            print(f"Boost for {author["name"]}: {author_score_boosts[author_id]}\n")
+
+    # Heuristically sort authors before querying Semantic Scholar
+    sorted_authors_with_boosts = sorted(author_score_boosts.items(), key=lambda item: item[1], reverse=True)
 
     if ranked_papers:
         # rate limit of 1 request per second
         time.sleep(2)
 
-        authors = search_authors(author_ids)
+        authors = search_authors(sorted_authors_with_boosts)
         ranked_authors = rank_authors(authors)
 
         experts = []
@@ -69,7 +96,7 @@ def get_expert_answer(question: str):
 
             name = author["name"]
             expertise = get_expertise(author["papers"])
-            top_papers = filter_papers(author["papers"], paper_ids)
+            top_papers = filter_papers(author["papers"], key_paper_ids)
 
             affiliations = author["affiliations"]
             contact = {}

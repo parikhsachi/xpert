@@ -27,6 +27,6 @@ def combined_author_score(author: dict) -> float:
     return (
         0.4 * min(h_index / 100.0, 1.0) +           # Normalize h-index to 0–1
         0.1 * min(paper_count / 100.0, 1.0) +       # Normalize paper count to 0–1
-        0.3 * top_paper_score +                     # Already normalized 0–1
+        0.2 * top_paper_score +                     # Already normalized 0–1
         0.2 * recency_score                         # Decay for freshness
     )
