@@ -61,7 +61,7 @@ const Home = () => {
             onClick={handleSendPrompt}
             className="mt-4 bg-nu-purple hover:bg-nu-purple-80 text-white font-semibold py-2 px-6 rounded"
           >
-            Get Answer
+            Retrieve Experts
           </button>
         )}
         {loading && (
