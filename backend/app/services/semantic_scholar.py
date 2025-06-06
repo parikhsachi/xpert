@@ -105,22 +105,22 @@ def search_authors(sorted_author_tuples: list[tuple[str, float]]):
     for author in json_data:
         author["score"] = ids_plus_score_boosts.get(author["authorId"], 0)
     
-    # dump file to temp file for testing
-    from pathlib import Path
+    # # dump file to temp file for testing
+    # from pathlib import Path
 
-    # Resolve the absolute path to the 'temp' directory
-    TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
-    TEMP_DIR.mkdir(parents=True, exist_ok=True)  # Create it if it doesn't exist
+    # # Resolve the absolute path to the 'temp' directory
+    # TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
+    # TEMP_DIR.mkdir(parents=True, exist_ok=True)  # Create it if it doesn't exist
 
-    # Example: create timestamped filename
-    from datetime import datetime
-    import json
+    # # Example: create timestamped filename
+    # from datetime import datetime
+    # import json
 
-    timestamp = datetime.now().isoformat().replace(":", "-")  # Safe for filenames
-    file_path = TEMP_DIR / f"authors-{timestamp}.json"
+    # timestamp = datetime.now().isoformat().replace(":", "-")  # Safe for filenames
+    # file_path = TEMP_DIR / f"authors-{timestamp}.json"
 
-    # Example usage: write JSON data to the file
-    with open(file_path, "w") as f:
-        json.dump(json_data, f, indent=2)
+    # # Example usage: write JSON data to the file
+    # with open(file_path, "w") as f:
+    #     json.dump(json_data, f, indent=2)
     
     return json_data

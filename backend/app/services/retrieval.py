@@ -110,6 +110,8 @@ def get_expert_answer(question: str):
                 if result:
                     orcid_data, orcid_id = result
                     if orcid_data:
+                        orcid_url = f"https://orcid.org/{orcid_id}"
+
                         affiliations = get_orcid_affiliations(orcid_id)
 
                         # Try to get contact info
@@ -130,6 +132,12 @@ def get_expert_answer(question: str):
                             for u in urls
                             if u.get("url", {}).get("value")
                         ]
+
+                        # Add ORCID URL to the front of the list
+                        contact["researcher-urls"].insert(0, {
+                            "name": "ORCID Profile",
+                            "url": orcid_url
+                        })
 
                         # External Identifiers
                         ext_ids = orcid_data.get("external-identifiers", {}).get("external-identifier", [])
