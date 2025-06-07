@@ -15,7 +15,7 @@ No intro, no explanations. Strict JSON only.
 
 BASE_PROMPT = """The user has asked: '{query}'\n\nHere are multiple experts and the abstracts of their papers. Write a \
 clear, assertive perspective on the topic for each expert based on their work. Carefully ensure that you write a paragraph \
-for EACH of the {count} authors\n\n
+for EACH of the {count} authors:\n\n
 """
 
 def query_openai_bulk(authors: list[dict], query: str) -> dict:
@@ -29,10 +29,13 @@ def query_openai_bulk(authors: list[dict], query: str) -> dict:
   prompt = BASE_PROMPT.format(query=query, count=len(authors))
 
   for author in authors:
-    author_id = author["authorId"]
+    author_id = author["id"]
     prompt += f"## Author ID: {author_id}\n"
     name = author["name"]
     prompt += f"## Name: {name}\n"
+    affiliations = author["affiliations"]
+    prompt += f"## Affiliations: {affiliations}\n"
+
     for paper in author["papers"]:
       title = paper.get("title", "No title")
       abstract = paper.get("abstract", "No abstract")

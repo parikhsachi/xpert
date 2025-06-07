@@ -66,29 +66,7 @@ def get_expert_answer(question: str):
         ranked_authors = rank_authors(authors)
 
         experts = []
-
-        # # import sample answers from json
-        # from pathlib import Path
-        # import json
-        # sample_answers = None
-        # TEMP_DIR = Path(__file__).resolve().parent.parent / "temp"
-        # file_path = TEMP_DIR / "sample_answers.json"
-        # with open(file_path, "r") as f:
-        #     sample_answers = json.load(f)["answers"]
-        # count = 0
-
-        # call GPT to get expert perspective
-        try:
-            author_data = [
-                {"name": author["name"], "authorId": author["authorId"], "papers": author["papers"][:5]}
-                for author in ranked_authors
-                if author["hIndex"] >= min_h_index
-            ]
-            gpt_answers = query_openai_bulk(authors=author_data, query=question)
-            print(f"\nGPT response type: {type(gpt_answers)}\nContent: {gpt_answers}\n")
-        except Exception as e:
-            print(f"OpenAI API call failed: {e}")
-            gpt_answers = {}
+        gpt_answers = []
 
         for author in ranked_authors:
             if author["hIndex"] < min_h_index:
@@ -100,8 +78,6 @@ def get_expert_answer(question: str):
 
             affiliations = author["affiliations"]
             contact = {}
-
-            gpt_answer = gpt_answers.get(author["authorId"], "We couldn't generate a response for this expert.")
 
             # if affiliations missing, try ORCID
             if not affiliations or all(not a for a in affiliations):
@@ -151,6 +127,7 @@ def get_expert_answer(question: str):
                         ]
 
             expert = {
+                "id": author["authorId"],
                 "name": name,
                 "url": author["url"],
                 "affiliations": affiliations or ["No affiliations found"],
@@ -158,11 +135,28 @@ def get_expert_answer(question: str):
                 "expertise": expertise,
                 "paperCount": author["paperCount"],
                 "papers": top_papers,
-                "answer": gpt_answer,
+                # "answer": gpt_answer,
                 "contact": contact
             }
             if expert not in experts:
                 experts.append(expert)
+
+
+        # call GPT to get expert perspective
+        try:
+            author_data = [
+                {"id": expert["id"], "name": expert["name"], "affiliations": expert["affiliations"], "papers": expert["papers"]}
+                for expert in experts
+            ]
+            gpt_answers = query_openai_bulk(authors=author_data, query=question)
+            print(f"\nGPT response type: {type(gpt_answers)}\nContent: {gpt_answers}\n")
+        except Exception as e:
+            print(f"OpenAI API call failed: {e}")
+            gpt_answers = {}
+
+        for expert in experts:
+            gpt_answer = gpt_answers.get(expert["id"], "We couldn't generate a response for this expert.")
+            expert["answer"] = gpt_answer
 
         return {
             "numExperts": len(experts),

@@ -168,7 +168,7 @@ const Home = () => {
                       )}
                       {activeExpert.contact["researcher-urls"]?.length > 0 && (
                         <div>
-                          <span className="font-semibold">Websites:</span>
+                          <span className="font-semibold">Profiles and Researcher URLs:</span>
                           {activeExpert.contact["researcher-urls"].map((site, i) => (
                             <a key={i} href={site.url} target="_blank" rel="noreferrer" className="block text-blue-700 underline">
                               {site.name || site.url}
@@ -178,7 +178,7 @@ const Home = () => {
                       )}
                       {activeExpert.contact["external-identifiers"]?.length > 0 && (
                         <div>
-                          <span className="font-semibold">Profiles:</span>
+                          <span className="font-semibold">External Identifiers:</span>
                           {activeExpert.contact["external-identifiers"].map((id, i) => (
                             <a key={i} href={id.url} target="_blank" rel="noreferrer" className="block text-blue-700 underline">
                               {id.name || id.url}
