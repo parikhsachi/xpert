@@ -73,6 +73,8 @@ OPENAI_API_KEY=your_key
 S2_API_KEY=your_key
 ```
 
+---
+
 ## 📡 API Endpoints
 | Endpoint     | Description                        |
 | ------------ | ---------------------------------- |
@@ -80,12 +82,16 @@ S2_API_KEY=your_key
 | `/rank`      | Applies ranking heuristic          |
 | `/summarize` | Generates AI-based insight summary |
 
+---
+
 ## 📈 Sample Output
 For a query like "deepfakes in political campaigns":
 | Expert          | Affiliation   | h-index | AI Perspective                                                       |
 | --------------- | ------------- | ------- | -------------------------------------------------------------------- |
 | Dr. Jane Doe    | MIT Media Lab | 47      | “Based on her 2023 paper on misinformation detection...”             |
 | Prof. Arvind K. | Stanford HAI  | 52      | “This technology raises urgent regulatory and ethical challenges...” |
+
+---
 
 ## 🧠 Execution Flow
 1. User inputs a question or topic
@@ -95,6 +101,8 @@ For a query like "deepfakes in political campaigns":
 5. Experts are ranked and scored
 6. GPT generates a perspective for each expert
 7. Results are rendered as expert cards in the frontend
+
+---
 
 ## 🧑‍💻 Team
 - Ian Slater – Full-stack developer, backend architecture
